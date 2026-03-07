@@ -1,0 +1,9 @@
+[user]
+	email = andrej.bozic@lego.com
+	signingkey = 4745DE879CF15C44
+
+[commit]
+	gpgsign = true
+
+[tag]
+	gpgSign = true

@@ -1,0 +1,14 @@
+{{- $is_work := false -}}
+{{- if (eq .chezmoi.hostname "M-03847") -}}
+{{-   $is_work = true -}}
+{{- end -}}
+
+[data]
+    is_work = {{ $is_work }}
+{{- if $is_work }}
+    anthropic_auth_token = {{ (bitwarden "item" "Secret-AnthropicAuthToken").login.password | quote }}
+    gh_pat = {{ (bitwarden "item" "Secret-GitHubPAT").login.password | quote }}
+{{- end }}
+
+[bitwarden]
+    unlock = "auto"

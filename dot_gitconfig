@@ -1,0 +1,31 @@
+[color]
+	ui = auto
+	branch = auto
+	diff = auto
+	grep = auto
+	interactive = auto
+	status = auto
+
+[user]
+	name = Andrej B
+	email = abozic389@gmail.com
+[init]
+	defaultBranch = main
+[core]
+	autocrlf = input
+
+[commit]
+	gpgsign = false
+[tag]
+	gpgSign = false
+###
+### Include local overrides
+###
+[includeIf "gitdir:~/work/"]
+	path = .gitconfig-work
+
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true

@@ -1,0 +1,93 @@
+# Load zinit
+ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
+[ ! -d $ZINIT_HOME ] && mkdir -p "$(dirname $ZINIT_HOME)"
+[ ! -d $ZINIT_HOME/.git ] && git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
+source "${ZINIT_HOME}/zinit.zsh"
+
+# Add zsh plugins
+zinit light zsh-users/zsh-syntax-highlighting
+zinit light zsh-users/zsh-completions
+zinit light zsh-users/zsh-autosuggestions
+zinit light Aloxaf/fzf-tab
+
+# Load completions
+autoload -U compinit && compinit
+
+# Replay cached completions for performance
+zinit cdreplay -q
+
+# History
+HISTSIZE=2000
+HISTFILE=~/.zsh_history
+SAVEHIST=$HISTSIZE
+HISTDUP=erase
+setopt appendhistory
+setopt sharehistory
+setopt hist_ignore_space
+setopt hist_ignore_all_dups
+setopt hist_save_no_dups
+setopt hist_ignore_dups
+setopt hist_find_no_dups
+
+# Completion styling
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' menu no
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza --color=always $realpath'
+zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'eza --color=always $realpath'
+
+# Shell integrations
+source <(fzf --zsh)
+eval "$(zoxide init --cmd cd zsh)"
+eval "$(mise activate zsh)"
+if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
+  eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh.toml)"
+fi
+
+# Eza - improved ls
+alias ls='eza'
+alias ll='eza -lhg'
+alias lla='eza -alhg' 
+alias tree='eza --tree'
+
+# Bat - improved cat
+alias cat='bat --paging=never --style=plain'
+alias catt='bat'
+alias cata='bat --show-all --paging=never --style=plain'
+# Colored man and help pages
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+alias -g -- --help='--help 2>&1 | bat --language=help --style=plain'
+
+# Use EMACS keybindings
+bindkey -e
+
+# Ctrl + arrow keys left/right not working
+bindkey "^[[1;5C" forward-word
+bindkey "^[[1;5D" backward-word
+
+# Add Kitty to path
+export PATH="$HOME/.local/bin:$PATH"
+
+# Bitwarden SSH agent
+{{- if eq .chezmoi.os "darwin" }}
+export SSH_AUTH_SOCK=$HOME/Library/Containers/com.bitwarden.desktop/Data/.bitwarden-ssh-agent.sock
+{{- else if eq .chezmoi.os "linux" }}
+export SSH_AUTH_SOCK=$HOME/.bitwarden-ssh-agent.sock
+{{- end }}
+
+# Load ENV variables
+{{- if .is_work }}
+# GitHub Token
+export HOMEBREW_GITHUB_API_TOKEN={{ .gh_pat }}
+
+# Claude Code
+export ANTHROPIC_DEFAULT_SONNET_MODEL="anthropic.claude-sonnet-4-5-20250929-v1:0"
+export ANTHROPIC_DEFAULT_HAIKU_MODEL="anthropic.claude-haiku-4-5-20251001-v1:0"
+export ANTHROPIC_DEFAULT_OPUS_MODEL="anthropic.claude-opus-4-5-20251101-v1:0"
+export ANTHROPIC_BASE_URL="https://models.assistant.legogroup.io/claude"
+export ANTHROPIC_AUTH_TOKEN={{ .anthropic_auth_token | quote }}
+{{- end}}
+
+# Added by Antigravity
+export PATH="/Users/dkandboz/.antigravity/antigravity/bin:$PATH"
+export EDITOR="nvim"
