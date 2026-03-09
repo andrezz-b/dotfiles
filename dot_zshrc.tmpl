@@ -61,6 +61,20 @@ alias -g -- --help='--help 2>&1 | bat --language=help --style=plain'
 # Use EMACS keybindings
 bindkey -e
 
+function sesh-sessions() {
+  {
+    exec </dev/tty
+    exec <&1
+    local session
+    session=$(sesh list -t -c -d -z | fzf --height 40% --reverse --border-label ' sesh ' --border --prompt '⚡  ')
+    zle reset-prompt > /dev/null 2>&1 || true
+    [[ -z "$session" ]] && return
+    sesh connect $session
+  }
+}
+
+alias seshl='sesh-sessions'
+
 # Ctrl + arrow keys left/right not working
 bindkey "^[[1;5C" forward-word
 bindkey "^[[1;5D" backward-word
