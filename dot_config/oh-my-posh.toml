@@ -41,19 +41,25 @@ console_title_template = '{{ .Shell }} in {{ .Folder }}'
     background = 'transparent'
     template = '  {{ .Full }}'
 
-  [[blocks.segments]]
+    [[blocks.segments]]
     type = 'node'
     style = 'plain'
     foreground = "#6ca35e"
     background = 'transparent'
+    template = " {{ if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ end }} {{ .Full }}"
+
+    [blocks.segments.options]
     fetch_package_manager = true
-    template = " {{ if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ end }}  {{ .Major }}"
+    bun_icon = "<#e5dbcc> bun</>"
+    npm_icon = "<#e5272d> npm</> "
+    pnpm_icon = "<#e5a100> pnpm</> "
+    yarn_icon = "<#37aee5> yarn</> "
 
   [[blocks.segments]]
     type = "aws"
     style = "plain"
     foreground = "#FFA400"
-    template = "  {{.Profile}}{{if .Region}}@{{.Region}}{{end}}"
+    template = "  {{.Profile}}"
 
 [[blocks]]
   type = 'rprompt'
