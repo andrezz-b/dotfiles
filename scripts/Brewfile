@@ -1,0 +1,24 @@
+# Taps
+tap "homebrew/bundle"
+
+# Packages
+brew "zsh"              # Shell
+brew "git"              # Version control
+
+# CLI Tools
+brew "eza"              # Modern ls replacement
+brew "bat"              # Cat with syntax highlighting
+brew "fzf"              # Fuzzy finder
+brew "fd"               # Modern find replacement
+brew "zoxide"           # Smarter cd command
+brew "mise"             # Runtime version manager
+brew "bitwarden-cli"    # Bitwarden CLI
+
+# Terminal & Prompt
+brew "tmux"             # Terminal multiplexer
+brew "sesh"             # Tmux session manager
+brew "jandedobbeleer/oh-my-posh/oh-my-posh"  # Prompt theme engine
+
+# Applications
+cask "kitty"            # Terminal emulator
+cask "bitwarden"        # Password manager

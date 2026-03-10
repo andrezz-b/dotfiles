@@ -1,0 +1,20 @@
+{{ if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+
+# Brewfile hash: {{ include "scripts/Brewfile" | sha256sum }}
+
+set -e
+
+echo "Installing packages with Homebrew..."
+
+# Install Homebrew if not already installed
+if ! command -v brew &> /dev/null; then
+    echo "Homebrew not found. Installing Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+
+# Install packages from Brewfile
+brew bundle --file={{ .chezmoi.sourceDir }}/scripts/Brewfile
+
+echo "Package installation complete!"
+{{ end -}}
