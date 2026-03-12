@@ -1,11 +1,11 @@
+-- Keymaps are automatically loaded on the VeryLazy event
+-- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
+-- Add any additional keymaps here
+
 local keymap = vim.keymap
 
--- Better window navigation (Alt + hjkl)
--- Works in Neovim and can be mapped in TWMs
--- keymap.set("n", "<A-h>", "<C-w>h")
--- keymap.set("n", "<A-j>", "<C-w>j")
--- keymap.set("n", "<A-k>", "<C-w>k")
--- keymap.set("n", "<A-l>", "<C-w>l")
+keymap.set("n", "<leader>p", '"+p', opts)
+keymap.set("n", "<leader>y", '"+y', opts)
 
 -- Fast scrolling
 keymap.set("n", "<C-d>", "<C-d>zz") -- Center screen after jump
@@ -23,4 +23,3 @@ keymap.set("v", "K", ":m '<-2<CR>gv=gv")
 
 keymap.set("n", "<leader>p", '"+p', opts)
 keymap.set("n", "<leader>y", '"+y', opts)
-

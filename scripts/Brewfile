@@ -13,6 +13,10 @@ brew "fd"               # Modern find replacement
 brew "zoxide"           # Smarter cd command
 brew "mise"             # Runtime version manager
 brew "bitwarden-cli"    # Bitwarden CLI
+brew "lazygit"
+brew "ripgrep"
+brew "imagemagick"
+
 
 # Terminal & Prompt
 brew "tmux"             # Terminal multiplexer
