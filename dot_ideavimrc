@@ -1,9 +1,5 @@
 " .ideavimrc - IdeaVim configuration adapted from Neovim settings
 
-" ============================================================================
-" OPTIONS (from lua/core/options.lua)
-" ============================================================================
-
 " Line Numbers
 set relativenumber
 set number
@@ -24,10 +20,6 @@ set nohlsearch
 " Behavior
 set clipboard+=unnamedplus
 set scrolloff=8
-
-" ============================================================================
-" KEYMAPS (from lua/core/keymaps.lua)
-" ============================================================================
 
 " Leader key
 let mapleader = " "
@@ -53,8 +45,10 @@ nnoremap <leader>p "+p
 nnoremap <leader>y "+y
 
 " Tab navigation
-nnoremap <Tab> :tabnext<CR>
-nnoremap <S-Tab> :tabprevious<CR>
+" nnoremap <Tab> :tabnext<CR>
+" nnoremap <S-Tab> :tabprevious<CR>
+nnoremap <leader>tn :tabnext<CR>
+nnoremap <leader>tp :tabprevious<CR>
 
 " ============================================================================
 " IDE-SPECIFIC ACTIONS (uncomment and customize as needed)
@@ -62,20 +56,20 @@ nnoremap <S-Tab> :tabprevious<CR>
 
 " File navigation
 nnoremap <leader>ff :action GotoFile<CR>
-nnoremap <leader>fg :action FindInPath<CR>
+nnoremap <leader>fs :action FindInPath<CR>
 
 " Code navigation
 nnoremap gd :action GotoDeclaration<CR>
 nnoremap gi :action GotoImplementation<CR>
-nnoremap gr :action FindUsages<CR>
 
 " Refactoring
 nnoremap <leader>a :action ShowIntentionActions<CR>
-" nnoremap <leader>rn :action RenameElement<CR>
-" nnoremap <leader>ca :action ShowIntentionActions<CR>
-    
-" Window management
-" nnoremap <C-h> <C-w>h
-" nnoremap <C-j> <C-w>j
-" nnoremap <C-k> <C-w>k
-" nnoremap <C-l> <C-w>l
+nnoremap <leader>rn :action RenameElement<CR>
+
+" splits
+nnoremap <C-w><bar> :action MoveTabRight<CR>
+nnoremap <C-w>- :sp<CR>
+
+" close
+nnoremap <leader>x :tabclose<CR>
+

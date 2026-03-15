@@ -1,0 +1,85 @@
+{{ if eq .chezmoi.os "linux" -}}
+#!/bin/bash
+
+# Package list hash: {{ include "scripts/Brewfile" | sha256sum }}
+
+set -e
+
+echo "Installing packages with apt..."
+
+# Update package list
+sudo apt-get update
+
+# Install packages
+# Core tools
+sudo apt-get install -y \
+    zsh \
+    git \
+    curl \
+    wget \
+    build-essential
+
+# CLI Tools
+sudo apt-get install -y \
+    bat \
+    fzf \
+    fd-find \
+    ripgrep \
+    imagemagick \
+    tmux
+
+# Install eza (modern ls replacement)
+# Note: eza may need to be installed from GitHub releases or cargo
+# Uncomment if available in your distro's repos, otherwise install manually
+# sudo apt-get install -y eza
+
+# Install zoxide (smarter cd command)
+# Note: zoxide may need to be installed via curl script or cargo
+# curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+
+# Install mise (runtime version manager, formerly rtx)
+# Note: mise needs to be installed via their install script
+# curl https://mise.run | sh
+
+# Install lazygit
+# Note: lazygit may need to be installed from GitHub releases or PPA
+# sudo add-apt-repository ppa:lazygit-team/release
+# sudo apt-get update
+# sudo apt-get install -y lazygit
+
+# Install bitwarden-cli
+# Note: bitwarden-cli needs to be downloaded from GitHub releases or snap
+# sudo snap install bw
+
+# Install sesh (tmux session manager)
+# Note: sesh needs to be installed from GitHub releases
+# Download from: https://github.com/joshmedeski/sesh
+
+# Install oh-my-posh
+# Note: oh-my-posh needs to be installed via their install script
+# curl -s https://ohmyposh.dev/install.sh | bash -s
+
+# Install kitty terminal emulator
+# Note: kitty can be installed via apt or their installer
+# sudo apt-get install -y kitty
+# Or: curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
+
+# Install Bitwarden desktop app
+# Note: Bitwarden desktop needs to be downloaded from their website or snap
+# sudo snap install bitwarden
+
+echo ""
+echo "Package installation complete!"
+echo ""
+echo "MANUAL INSTALLATION REQUIRED for the following:"
+echo "  - eza (https://github.com/eza-community/eza#installation)"
+echo "  - zoxide (curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash)"
+echo "  - mise (curl https://mise.run | sh)"
+echo "  - lazygit (https://github.com/jesseduffield/lazygit#installation)"
+echo "  - bitwarden-cli (sudo snap install bw)"
+echo "  - sesh (https://github.com/joshmedeski/sesh#installation)"
+echo "  - oh-my-posh (curl -s https://ohmyposh.dev/install.sh | bash -s)"
+echo "  - kitty (sudo apt-get install -y kitty OR curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin)"
+echo "  - bitwarden desktop (sudo snap install bitwarden)"
+echo ""
+{{ end -}}
