@@ -24,9 +24,20 @@ echo ""
 check_command() {
     local cmd=$1
     local package_name=${2:-$1}
+    local version_flag=${3:---version}
 
     if command -v "$cmd" &>/dev/null; then
-        echo -e "${GREEN}✓${NC} $package_name ($(command -v "$cmd"))"
+        local version=""
+        # Try to get version information
+        if [[ "$version_flag" != "none" ]]; then
+            version=$("$cmd" $version_flag 2>&1 | head -n 1 | sed 's/^[[:space:]]*//' || echo "")
+        fi
+
+        if [[ -n "$version" ]]; then
+            echo -e "${GREEN}✓${NC} $package_name - ${YELLOW}$version${NC}"
+        else
+            echo -e "${GREEN}✓${NC} $package_name ($(command -v "$cmd"))"
+        fi
         ((INSTALLED++))
         return 0
     else
@@ -56,14 +67,14 @@ check_command "mise" "mise (Runtime version manager)"
 check_command "bw" "bitwarden-cli"
 check_command "lazygit" "lazygit"
 check_command "rg" "ripgrep"
-check_command "convert" "imagemagick"
+check_command "convert" "imagemagick" "-version"
 check_command "nvim" "neovim (Text editor)"
 echo ""
 
 # Terminal & Prompt
 echo "Terminal & Prompt:"
 echo "------------------"
-check_command "tmux" "tmux (Terminal multiplexer)"
+check_command "tmux" "tmux (Terminal multiplexer)" "-V"
 check_command "sesh" "sesh (Tmux session manager)"
 check_command "oh-my-posh" "oh-my-posh (Prompt theme engine)"
 echo ""
@@ -71,7 +82,7 @@ echo ""
 # Applications
 echo "Applications:"
 echo "-------------"
-check_command "kitty" "kitty (Terminal emulator)"
+check_command "kitty" "kitty (Terminal emulator)" "+version"
 echo ""
 
 # Summary
