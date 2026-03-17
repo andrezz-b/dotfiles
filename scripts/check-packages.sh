@@ -3,8 +3,6 @@
 # Sanity check script to verify all required packages are installed
 # Works on both macOS and Linux
 
-set -e
-
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'

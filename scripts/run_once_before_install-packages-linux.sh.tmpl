@@ -22,17 +22,17 @@ sudo apt-get install -y \
 # CLI Tools
 sudo apt-get install -y \
     bat \
-    fzf \
-    fd-find \
-    ripgrep \
     imagemagick \
-    tmux \
-    neovim
+    tmux
  
-# Bat executable might be installed with the worng name 
+# Bat executable might be installed with the wrong name
 mkdir -p ~/.local/bin
-ln -s /usr/bin/batcat ~/.local/bin/bat
-ln -s $(which fdfind) ~/.local/bin/fd
+[ -e ~/.local/bin/bat ] || ln -s /usr/bin/batcat ~/.local/bin/bat
+
+# Neovim
+curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
+sudo rm -rf /opt/nvim-linux-x86_64
+sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
 
 # Install eza (modern ls replacement)
 sudo apt install -y gpg

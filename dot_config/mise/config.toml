@@ -1,6 +1,9 @@
 [tools]
+fd = "latest"
+fzf = "latest"
 node = "24"
 python = "3.14"
+ripgrep = "latest"
 uv = "latest"
 
 [settings]
