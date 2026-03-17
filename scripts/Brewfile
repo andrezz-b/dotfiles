@@ -16,6 +16,7 @@ brew "bitwarden-cli"    # Bitwarden CLI
 brew "lazygit"
 brew "ripgrep"
 brew "imagemagick"
+brew "neovim"           # Text editor
 
 
 # Terminal & Prompt

@@ -26,26 +26,34 @@ sudo apt-get install -y \
     fd-find \
     ripgrep \
     imagemagick \
-    tmux
+    tmux \
+    neovim
+ 
+# Bat executable might be installed with the worng name 
+mkdir -p ~/.local/bin
+ln -s /usr/bin/batcat ~/.local/bin/bat
+ln -s $(which fdfind) ~/.local/bin/fd
 
 # Install eza (modern ls replacement)
-# Note: eza may need to be installed from GitHub releases or cargo
-# Uncomment if available in your distro's repos, otherwise install manually
-# sudo apt-get install -y eza
+sudo apt install -y gpg
+sudo mkdir -p /etc/apt/keyrings
+wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
+sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
+sudo apt update
+sudo apt install -y eza
 
 # Install zoxide (smarter cd command)
-# Note: zoxide may need to be installed via curl script or cargo
-# curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
 
 # Install mise (runtime version manager, formerly rtx)
-# Note: mise needs to be installed via their install script
-# curl https://mise.run | sh
+curl https://mise.run | sh
 
 # Install lazygit
-# Note: lazygit may need to be installed from GitHub releases or PPA
-# sudo add-apt-repository ppa:lazygit-team/release
-# sudo apt-get update
-# sudo apt-get install -y lazygit
+LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | \grep -Po '"tag_name": *"v\K[^"]*')
+curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
+tar xf lazygit.tar.gz lazygit
+sudo install lazygit -D -t /usr/local/bin/
 
 # Install bitwarden-cli
 # Note: bitwarden-cli needs to be downloaded from GitHub releases or snap
@@ -56,13 +64,10 @@ sudo apt-get install -y \
 # Download from: https://github.com/joshmedeski/sesh
 
 # Install oh-my-posh
-# Note: oh-my-posh needs to be installed via their install script
-# curl -s https://ohmyposh.dev/install.sh | bash -s
+curl -s https://ohmyposh.dev/install.sh | bash -s
 
 # Install kitty terminal emulator
-# Note: kitty can be installed via apt or their installer
-# sudo apt-get install -y kitty
-# Or: curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
+curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
 
 # Install Bitwarden desktop app
 # Note: Bitwarden desktop needs to be downloaded from their website or snap
@@ -72,14 +77,8 @@ echo ""
 echo "Package installation complete!"
 echo ""
 echo "MANUAL INSTALLATION REQUIRED for the following:"
-echo "  - eza (https://github.com/eza-community/eza#installation)"
-echo "  - zoxide (curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash)"
-echo "  - mise (curl https://mise.run | sh)"
-echo "  - lazygit (https://github.com/jesseduffield/lazygit#installation)"
 echo "  - bitwarden-cli (sudo snap install bw)"
 echo "  - sesh (https://github.com/joshmedeski/sesh#installation)"
-echo "  - oh-my-posh (curl -s https://ohmyposh.dev/install.sh | bash -s)"
-echo "  - kitty (sudo apt-get install -y kitty OR curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin)"
 echo "  - bitwarden desktop (sudo snap install bitwarden)"
 echo ""
 {{ end -}}
