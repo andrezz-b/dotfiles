@@ -129,7 +129,8 @@ export PATH="$HOME/.local/bin:$PATH"
 {{- if eq .chezmoi.os "darwin" }}
 export SSH_AUTH_SOCK=$HOME/Library/Containers/com.bitwarden.desktop/Data/.bitwarden-ssh-agent.sock
 {{- else if eq .chezmoi.os "linux" }}
-export SSH_AUTH_SOCK=$HOME/.bitwarden-ssh-agent.sock
+# Flatpak
+export SSH_AUTH_SOCK=$HOME/.var/app/com.bitwarden.desktop/data/.bitwarden-ssh-agent.sock
 export PATH="$PATH:/opt/nvim-linux-x86_64/bin"
 {{- end }}
 

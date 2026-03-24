@@ -1,0 +1,8 @@
+Host github.com
+    HostName github.com
+    User git
+    {{- if .is_work }}
+    IdentityFile ~/.ssh/id_work.pub
+    {{- else }}
+    IdentityFile ~/.ssh/id_personal.pub
+    {{- end }}
