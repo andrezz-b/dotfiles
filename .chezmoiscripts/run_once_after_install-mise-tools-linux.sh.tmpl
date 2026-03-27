@@ -1,0 +1,160 @@
+{{ if eq .chezmoi.os "linux" -}}
+#!/bin/bash
+
+# Mise tools hash: {{ include "dot_config/mise/config.toml.tmpl" | sha256sum }}
+
+set -e
+
+# Color codes for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+echo ""
+echo "======================================================"
+echo "  Installing mise tools"
+echo "======================================================"
+echo ""
+
+# Add mise to PATH for this session
+export PATH="$HOME/.local/bin:$PATH"
+
+# Set SSH_AUTH_SOCK for this session
+if [ -S "$HOME/snap/bitwarden/current/.bitwarden-ssh-agent.sock" ]; then
+    export SSH_AUTH_SOCK="$HOME/snap/bitwarden/current/.bitwarden-ssh-agent.sock"
+elif [ -S "$HOME/.var/app/com.bitwarden.desktop/data/.bitwarden-ssh-agent.sock" ]; then
+    export SSH_AUTH_SOCK="$HOME/.var/app/com.bitwarden.desktop/data/.bitwarden-ssh-agent.sock"
+elif [ -S "$HOME/.bitwarden-ssh-agent.sock" ]; then
+    export SSH_AUTH_SOCK="$HOME/.bitwarden-ssh-agent.sock"
+fi
+
+# Check if mise is installed
+if ! command -v mise &> /dev/null; then
+    echo -e "${RED}⨯ mise not found. This should have been installed in the previous step.${NC}"
+    echo "Please run: curl https://mise.run | sh"
+    exit 1
+fi
+
+# Check if mise config exists
+if [ ! -f "$HOME/.config/mise/config.toml" ] && [ ! -f "$HOME/.tool-versions" ] && [ ! -f "$HOME/.mise.toml" ]; then
+    echo -e "${YELLOW}No mise configuration found. Skipping mise tool installation.${NC}"
+    exit 0
+fi
+
+echo "Mise configuration found at:"
+if [ -f "$HOME/.config/mise/config.toml" ]; then
+    echo "  ~/.config/mise/config.toml"
+fi
+if [ -f "$HOME/.tool-versions" ]; then
+    echo "  ~/.tool-versions"
+fi
+if [ -f "$HOME/.mise.toml" ]; then
+    echo "  ~/.mise.toml"
+fi
+echo ""
+
+# Check GitHub authentication
+echo "======================================================"
+echo "  Verifying GitHub SSH Authentication"
+echo "======================================================"
+echo ""
+
+if [ -n "$SSH_AUTH_SOCK" ]; then
+    echo -e "${GREEN}✓ SSH agent socket configured: $SSH_AUTH_SOCK${NC}"
+else
+    echo -e "${YELLOW}⨯ SSH_AUTH_SOCK not set${NC}"
+fi
+
+echo ""
+echo "Testing GitHub SSH authentication..."
+set +e
+github_output=$(ssh -T -o ConnectTimeout=10 -o StrictHostKeyChecking=no git@github.com 2>&1)
+github_result=$?
+set -e
+
+if echo "$github_output" | grep -q "successfully authenticated"; then
+    echo -e "${GREEN}✓ GitHub authentication successful!${NC}"
+    github_user=$(echo "$github_output" | grep -oP "Hi \K[^!]+" || echo "unknown")
+    echo "  Authenticated as: $github_user"
+else
+    echo -e "${YELLOW}⨯ GitHub authentication failed or not configured${NC}"
+    echo ""
+    echo "This may cause rate limiting issues when installing tools from GitHub."
+    echo ""
+    echo "To fix:"
+    echo "  1. Verify Bitwarden SSH agent is running"
+    echo "  2. Check if your SSH key is loaded: ssh-add -l"
+    echo "  3. Test GitHub connection: ssh -T git@github.com"
+    echo ""
+    read -p "Continue anyway? Some tools may fail to install [y/N]: " continue_anyway
+    if [[ ! $continue_anyway =~ ^[Yy]$ ]]; then
+        echo -e "${RED}Installation cancelled.${NC}"
+        echo ""
+        echo "After fixing GitHub authentication, you can run:"
+        echo "  mise install"
+        exit 1
+    fi
+    echo ""
+    echo -e "${YELLOW}Continuing without GitHub authentication...${NC}"
+fi
+
+echo ""
+echo "======================================================"
+echo "  Installing mise tools"
+echo "======================================================"
+echo ""
+
+# Activate mise for this session
+eval "$(mise activate bash)"
+
+# Install mise tools
+echo "Installing mise tools..."
+echo ""
+
+set +e
+mise install
+install_result=$?
+set -e
+
+if [ $install_result -eq 0 ]; then
+    echo ""
+    echo -e "${GREEN}✓ Mise tools installed successfully!${NC}"
+    echo ""
+    echo "Installed tools:"
+    mise list
+else
+    echo ""
+    echo -e "${YELLOW}⨯ Some mise tools failed to install.${NC}"
+    echo ""
+    echo "Common reasons:"
+    echo "  1. GitHub rate limiting (requires authentication)"
+    echo "  2. Network connectivity issues"
+    echo "  3. Missing system dependencies"
+    echo ""
+    echo "Troubleshooting:"
+    echo "  1. Verify GitHub authentication: ssh -T git@github.com"
+    echo "  2. Check mise status: mise doctor"
+    echo "  3. Try installing manually: mise install"
+    echo ""
+    echo "Partially installed tools:"
+    mise list
+    echo ""
+
+    read -p "Accept partial installation? [y/N]: " accept_partial
+    if [[ ! $accept_partial =~ ^[Yy]$ ]]; then
+        exit 1
+    fi
+fi
+
+echo ""
+echo -e "${GREEN}======================================================"
+echo "  Mise Tools Installation Complete!"
+echo "======================================================${NC}"
+echo ""
+echo "Next steps:"
+echo "  1. Restart your shell or run: exec zsh"
+echo "  2. All tools should now be available"
+echo "  3. Run 'mise list' to see installed tools"
+echo ""
+{{ end -}}

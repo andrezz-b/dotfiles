@@ -37,86 +37,102 @@ setopt hist_find_no_dups
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 zstyle ':completion:*' menu no
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza --color=always $realpath'
-zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'eza --color=always $realpath'
+
+# Configure fzf-tab preview based on available tools
+if command -v eza &> /dev/null; then
+  zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza --color=always $realpath'
+  zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'eza --color=always $realpath'
+else
+  zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls -lah $realpath'
+  zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls -lah $realpath'
+fi
 
 # Shell integrations
-eval "$(zoxide init --cmd cd zsh)"
-eval "$(mise activate zsh)"
-if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
+if command -v zoxide &> /dev/null; then
+  eval "$(zoxide init --cmd cd zsh)"
+fi
+
+if command -v mise &> /dev/null; then
+  eval "$(mise activate zsh)"
+fi
+
+if [ "$TERM_PROGRAM" != "Apple_Terminal" ] && command -v oh-my-posh &> /dev/null; then
   eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh.toml)"
 fi
 
 # Eza - improved ls
-alias ls='eza'
-alias ll='eza -lhg'
-alias lla='eza -alhg' 
-alias tree='eza --tree'
+if command -v eza &> /dev/null; then
+  alias ls='eza'
+  alias ll='eza -lhg'
+  alias lla='eza -alhg'
+  alias tree='eza --tree'
+else
+  alias ll='ls -lh'
+  alias lla='ls -lah'
+  alias tree='ls -R'
+fi
 
 # Bat - improved cat
-alias cat='bat --paging=never --style=plain'
-alias catt='bat'
-alias cata='bat --show-all --paging=never --style=plain'
-# Colored man and help pages
-export MANPAGER="sh -c 'col -bx | bat -l man -p'"
-alias -g -- --help='--help 2>&1 | bat --language=help --style=plain'
+if command -v bat &> /dev/null; then
+  alias cat='bat --paging=never --style=plain'
+  alias catt='bat'
+  alias cata='bat --show-all --paging=never --style=plain'
+  # Colored man and help pages
+  export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+  alias -g -- --help='--help 2>&1 | bat --language=help --style=plain'
+fi
 
 # zsh-vim plugin rebinds the keys so to keep the bindings from other plugins they need to be here
 zvm_after_init_commands+=(
-  ". <(fzf --zsh)"
   "bindkey '^p' history-search-backward"
   "bindkey '^n' history-search-forward"
   "bindkey '^y' autosuggest-accept"
 )
-# FZF
-# -- Use fd instead of fzf --
 
-export FZF_DEFAULT_COMMAND="fd --hidden --strip-cwd-prefix --exclude .git"
-export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-export FZF_ALT_C_COMMAND="fd --type=d --hidden --strip-cwd-prefix --exclude .git"
+# FZF integration - only if fzf is installed
+if command -v fzf &> /dev/null; then
+  zvm_after_init_commands+=( ". <(fzf --zsh)" )
 
-# Use fd (https://github.com/sharkdp/fd) for listing path candidates.
-# - The first argument to the function ($1) is the base path to start traversal
-# - See the source code (completion.{bash,zsh}) for the details.
-_fzf_compgen_path() {
-  fd --hidden --exclude .git . "$1"
-}
+  # Configure FZF to use fd if available, otherwise use find
+  if command -v fd &> /dev/null; then
+    export FZF_DEFAULT_COMMAND="fd --hidden --strip-cwd-prefix --exclude .git"
+    export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+    export FZF_ALT_C_COMMAND="fd --type=d --hidden --strip-cwd-prefix --exclude .git"
 
-# Use fd to generate the list for directory completion
-_fzf_compgen_dir() {
-  fd --type=d --hidden --exclude .git . "$1"
-}
-# show_file_or_dir_preview="if [ -d {} ]; then eza --tree --color=always {} | head -200; else bat -n --color=always --line-range :500 {}; fi"
-# 
-# export FZF_CTRL_T_OPTS="--preview '$show_file_or_dir_preview'"
-# export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always {} | head -200'"
-# 
-# _fzf_comprun() {
-#   local command=$1
-#   shift
-# 
-#   case "$command" in
-#     cd)           fzf --preview 'eza --tree --color=always {} | head -200' "$@" ;;
-#     export|unset) fzf --preview "eval 'echo ${}'"         "$@" ;;
-#     ssh)          fzf --preview 'dig {}'                   "$@" ;;
-#     *)            fzf --preview "$show_file_or_dir_preview" "$@" ;;
-#   esac
-# }
+    # Use fd (https://github.com/sharkdp/fd) for listing path candidates.
+    # - The first argument to the function ($1) is the base path to start traversal
+    # - See the source code (completion.{bash,zsh}) for the details.
+    _fzf_compgen_path() {
+      fd --hidden --exclude .git . "$1"
+    }
 
-# sesh
-function sesh-sessions() {
-  {
-    exec </dev/tty
-    exec <&1
-    local session
-    session=$(sesh list -t -c -d -z | fzf --height 40% --reverse --border-label ' sesh ' --border --prompt '⚡  ')
-    zle reset-prompt > /dev/null 2>&1 || true
-    [[ -z "$session" ]] && return
-    sesh connect $session
+    # Use fd to generate the list for directory completion
+    _fzf_compgen_dir() {
+      fd --type=d --hidden --exclude .git . "$1"
+    }
+  else
+    export FZF_DEFAULT_COMMAND="find . -path '*/\.*' -prune -o -type f -print -o -type l -print 2> /dev/null | sed s/^..//"
+    export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+    export FZF_ALT_C_COMMAND="find . -path '*/\.*' -prune -o -type d -print 2> /dev/null | sed s/^..//"
+  fi
+fi
+
+# sesh - only if sesh and fzf are installed
+if command -v sesh &> /dev/null && command -v fzf &> /dev/null; then
+  function sesh-sessions() {
+    {
+      exec </dev/tty
+      exec <&1
+      local session
+      session=$(sesh list -t -c -d -z | fzf --height 40% --reverse --border-label ' sesh ' --border --prompt '⚡  ')
+      zle reset-prompt > /dev/null 2>&1 || true
+      [[ -z "$session" ]] && return
+      sesh connect $session
+    }
   }
-}
 
-alias seshl='sesh-sessions'
+  alias seshl='sesh-sessions'
+fi
 
 # Ctrl + arrow keys left/right not working
 bindkey "^[[1;5C" forward-word
@@ -129,8 +145,18 @@ export PATH="$HOME/.local/bin:$PATH"
 {{- if eq .chezmoi.os "darwin" }}
 export SSH_AUTH_SOCK=$HOME/Library/Containers/com.bitwarden.desktop/Data/.bitwarden-ssh-agent.sock
 {{- else if eq .chezmoi.os "linux" }}
-# Flatpak
-export SSH_AUTH_SOCK=$HOME/.var/app/com.bitwarden.desktop/data/.bitwarden-ssh-agent.sock
+# Check for Bitwarden SSH agent socket based on installation type
+if [ -S "$HOME/snap/bitwarden/current/.bitwarden-ssh-agent.sock" ]; then
+  # Snap installation
+  export SSH_AUTH_SOCK=$HOME/snap/bitwarden/current/.bitwarden-ssh-agent.sock
+elif [ -S "$HOME/.var/app/com.bitwarden.desktop/data/.bitwarden-ssh-agent.sock" ]; then
+  # Flatpak installation
+  export SSH_AUTH_SOCK=$HOME/.var/app/com.bitwarden.desktop/data/.bitwarden-ssh-agent.sock
+elif [ -S "$HOME/.bitwarden-ssh-agent.sock" ]; then
+  # Binary installation
+  export SSH_AUTH_SOCK=$HOME/.bitwarden-ssh-agent.sock
+fi
+
 export PATH="$PATH:/opt/nvim-linux-x86_64/bin"
 {{- end }}
 
@@ -147,6 +173,6 @@ export ANTHROPIC_BASE_URL="https://models.assistant.legogroup.io/claude"
 export ANTHROPIC_AUTH_TOKEN={{ .anthropic_auth_token | quote }}
 {{- end}}
 
-# Added by Antigravity
 export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
+export PATH="$HOME/bin:$PATH"
 export EDITOR="nvim"

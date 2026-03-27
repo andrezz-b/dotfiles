@@ -1,8 +1,5 @@
-# Taps
-tap "homebrew/bundle"
-
 # Packages
-brew "zsh"              # Shell
+brew "zsh"              
 brew "git"              # Version control
 
 # CLI Tools
@@ -25,5 +22,4 @@ brew "sesh"             # Tmux session manager
 brew "jandedobbeleer/oh-my-posh/oh-my-posh"  # Prompt theme engine
 
 # Applications
-cask "kitty"            # Terminal emulator
 cask "bitwarden"        # Password manager

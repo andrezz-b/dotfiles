@@ -1,0 +1,321 @@
+{{ if eq .chezmoi.os "linux" -}}
+#!/bin/bash
+
+# Package list hash: {{ include "scripts/Brewfile" | sha256sum }}
+
+set -e
+
+# Color codes for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Helper functions
+check_bitwarden_installed() {
+    if command -v flatpak &> /dev/null && flatpak list 2>/dev/null | grep -q "com.bitwarden.desktop"; then
+        echo "flatpak"
+        return 0
+    elif command -v snap &> /dev/null && snap list 2>/dev/null | grep -q "^bitwarden "; then
+        echo "snap"
+        return 0
+    else
+        return 1
+    fi
+}
+
+check_ssh_agent_socket() {
+    local snap_socket="$HOME/snap/bitwarden/current/.bitwarden-ssh-agent.sock"
+    local flatpak_socket="$HOME/.var/app/com.bitwarden.desktop/data/.bitwarden-ssh-agent.sock"
+    local binary_socket="$HOME/.bitwarden-ssh-agent.sock"
+
+    if [ -S "$snap_socket" ]; then
+        echo "$snap_socket"
+        return 0
+    elif [ -S "$flatpak_socket" ]; then
+        echo "$flatpak_socket"
+        return 0
+    elif [ -S "$binary_socket" ]; then
+        echo "$binary_socket"
+        return 0
+    else
+        return 1
+    fi
+}
+
+install_bitwarden() {
+    echo ""
+    echo -e "${YELLOW}Bitwarden is not installed. This is required for SSH authentication with GitHub.${NC}"
+    echo ""
+    echo "Available installation methods:"
+    echo "  1) Flatpak (recommended)"
+    echo "  2) Snap"
+    echo "  3) Skip (install manually later)"
+    echo ""
+    read -p "Choose installation method [1-3]: " choice
+
+    case $choice in
+        1)
+            if ! command -v flatpak &> /dev/null; then
+                echo -e "${YELLOW}Installing flatpak...${NC}"
+                sudo apt-get update
+                sudo apt-get install -y flatpak
+                sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+            fi
+            echo -e "${GREEN}Installing Bitwarden via Flatpak...${NC}"
+            flatpak install -y flathub com.bitwarden.desktop
+            return 0
+            ;;
+        2)
+            if ! command -v snap &> /dev/null; then
+                echo -e "${YELLOW}Installing snapd...${NC}"
+                sudo apt-get update
+                sudo apt-get install -y snapd
+            fi
+            echo -e "${GREEN}Installing Bitwarden via Snap...${NC}"
+            sudo snap install bitwarden
+            return 0
+            ;;
+        3)
+            echo -e "${RED}Skipping Bitwarden installation.${NC}"
+            return 1
+            ;;
+        *)
+            echo -e "${RED}Invalid choice. Skipping Bitwarden installation.${NC}"
+            return 1
+            ;;
+    esac
+}
+
+prompt_bitwarden_setup() {
+    echo ""
+    echo -e "${YELLOW}=====================================================${NC}"
+    echo -e "${YELLOW}  Bitwarden SSH Agent Setup Required${NC}"
+    echo -e "${YELLOW}=====================================================${NC}"
+    echo ""
+    echo "To continue with package installation, you need to:"
+    echo ""
+    echo "1. Open Bitwarden application"
+    echo "2. Log in to your account"
+    echo "3. Go to Settings → Preferences"
+    echo "4. Enable 'Use Bitwarden as SSH agent'"
+    echo "5. Make sure your SSH keys are stored in Bitwarden"
+    echo ""
+    echo -e "${GREEN}Press Enter when you have completed these steps...${NC}"
+    read -r
+}
+
+wait_for_ssh_agent() {
+    echo -e "${YELLOW}Waiting for SSH agent socket to be available...${NC}"
+    local max_attempts=30
+    local attempt=0
+
+    while [ $attempt -lt $max_attempts ]; do
+        if check_ssh_agent_socket &> /dev/null; then
+            echo -e "${GREEN}SSH agent socket detected!${NC}"
+            return 0
+        fi
+        attempt=$((attempt + 1))
+        echo "Attempt $attempt/$max_attempts..."
+        sleep 2
+    done
+
+    echo -e "${RED}SSH agent socket not found after $max_attempts attempts.${NC}"
+    return 1
+}
+
+# Main installation flow
+echo "======================================================"
+echo "  Linux Package Installation"
+echo "======================================================"
+echo ""
+
+# Check Bitwarden and SSH setup
+set +e
+BW_TYPE=$(check_bitwarden_installed)
+BW_INSTALLED=$?
+set -e
+
+if [ $BW_INSTALLED -ne 0 ]; then
+    echo -e "${YELLOW}⨯ Bitwarden is not installed${NC}"
+
+    set +e
+    install_bitwarden
+    INSTALL_RESULT=$?
+    set -e
+
+    if [ $INSTALL_RESULT -ne 0 ]; then
+        echo -e "${RED}Cannot proceed without Bitwarden for GitHub authentication.${NC}"
+        exit 1
+    fi
+
+    set +e
+    BW_TYPE=$(check_bitwarden_installed)
+    BW_INSTALLED=$?
+    set -e
+fi
+
+if [ $BW_INSTALLED -eq 0 ]; then
+    echo -e "${GREEN}✓ Bitwarden is installed ($BW_TYPE)${NC}"
+
+    set +e
+    SSH_SOCKET=$(check_ssh_agent_socket)
+    SOCKET_CHECK=$?
+    set -e
+
+    if [ $SOCKET_CHECK -ne 0 ]; then
+        echo -e "${YELLOW}⨯ SSH agent socket not found${NC}"
+        prompt_bitwarden_setup
+
+        set +e
+        wait_for_ssh_agent
+        WAIT_RESULT=$?
+        set -e
+
+        if [ $WAIT_RESULT -ne 0 ]; then
+            echo -e "${YELLOW}Warning: SSH agent not detected. You may need to set it up manually.${NC}"
+            echo ""
+            read -p "Continue anyway? [y/N]: " continue_anyway
+            if [[ ! $continue_anyway =~ ^[Yy]$ ]]; then
+                echo -e "${RED}Installation cancelled.${NC}"
+                exit 1
+            fi
+        else
+            # Get the socket path after successful wait
+            SSH_SOCKET=$(check_ssh_agent_socket)
+        fi
+    else
+        echo -e "${GREEN}✓ SSH agent socket is available${NC}"
+    fi
+
+    echo ""
+    echo -e "${YELLOW}Note: GitHub authentication will be checked after your dotfiles are applied${NC}"
+    echo -e "${YELLOW}Note: SSH agent socket configuration is managed by your .zshrc${NC}"
+fi
+
+echo ""
+echo "======================================================"
+echo "  Installing System Packages"
+echo "======================================================"
+echo ""
+
+# Update package list
+sudo apt-get update
+
+# Install packages
+# Core tools
+sudo apt-get install -y \
+    zsh \
+    git \
+    curl \
+    wget \
+    build-essential
+
+# CLI Tools
+sudo apt-get install -y \
+    bat \
+    imagemagick \
+    tmux
+
+# Bat executable might be installed with the wrong name
+mkdir -p ~/.local/bin
+[ -e ~/.local/bin/bat ] || ln -s /usr/bin/batcat ~/.local/bin/bat
+
+# Neovim
+echo "Installing Neovim..."
+curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
+sudo rm -rf /opt/nvim-linux-x86_64
+sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
+rm nvim-linux-x86_64.tar.gz
+
+# Install eza (modern ls replacement)
+echo "Installing eza..."
+sudo apt install -y gpg
+sudo mkdir -p /etc/apt/keyrings
+wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
+sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
+sudo apt update
+sudo apt install -y eza
+
+# Install zoxide (smarter cd command)
+echo "Installing zoxide..."
+curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+
+# Install mise (runtime version manager, formerly rtx)
+echo "Installing mise..."
+curl https://mise.run | sh
+
+# Install lazygit
+echo "Installing lazygit..."
+LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": *"v\K[^"]*')
+curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
+tar xf lazygit.tar.gz lazygit
+sudo install lazygit -D -t /usr/local/bin/
+rm lazygit.tar.gz lazygit
+
+# Install sesh (tmux session manager)
+# TODO
+
+# Install oh-my-posh
+echo "Installing oh-my-posh..."
+curl -s https://ohmyposh.dev/install.sh | bash -s
+
+# Fonts
+curl -fsSL https://raw.githubusercontent.com/JetBrains/JetBrainsMono/master/install_manual.sh | sh
+
+# Install kitty terminal emulator
+echo "Installing kitty..."
+curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
+
+# Change default shell to zsh
+echo ""
+echo "======================================================"
+echo "  Configuring Shell"
+echo "======================================================"
+echo ""
+
+if [ "$SHELL" != "$(which zsh)" ]; then
+    # Check if zsh is in /etc/shells
+    if ! grep -q "$(which zsh)" /etc/shells; then
+        echo "$(which zsh)" | sudo tee -a /etc/shells
+    fi
+
+    echo "Changing default shell to zsh..."
+    if chsh -s "$(which zsh)"; then
+        echo -e "${GREEN}✓ Default shell changed to zsh${NC}"
+        echo ""
+        echo -e "${YELLOW}IMPORTANT: You must log out and log back in for the shell change to take effect.${NC}"
+        NEEDS_RELOGIN=true
+    else
+        echo -e "${YELLOW}⨯ Failed to change shell. You may need to run manually:${NC}"
+        echo "  chsh -s \$(which zsh)"
+    fi
+else
+    echo -e "${GREEN}✓ Default shell is already zsh${NC}"
+fi
+
+echo ""
+echo -e "${GREEN}======================================================"
+echo "  System Package Installation Complete!"
+echo "======================================================${NC}"
+echo ""
+echo "Note: Mise tools (fd, fzf, ripgrep, etc.) will be installed"
+echo "      after chezmoi populates the configuration files."
+echo ""
+
+if [ "$NEEDS_RELOGIN" = true ]; then
+    echo ""
+    echo -e "${YELLOW}********************************************************${NC}"
+    echo -e "${YELLOW}*  ACTION REQUIRED: LOG OUT AND LOG BACK IN           *${NC}"
+    echo -e "${YELLOW}*                                                      *${NC}"
+    echo -e "${YELLOW}*  Your default shell has been changed to zsh.        *${NC}"
+    echo -e "${YELLOW}*  You must log out and log back in to apply this     *${NC}"
+    echo -e "${YELLOW}*  change before continuing with chezmoi.             *${NC}"
+    echo -e "${YELLOW}*                                                      *${NC}"
+    echo -e "${YELLOW}*  After logging back in, run:                        *${NC}"
+    echo -e "${YELLOW}*    chezmoi apply                                    *${NC}"
+    echo -e "${YELLOW}********************************************************${NC}"
+    echo ""
+fi
+{{ end -}}
