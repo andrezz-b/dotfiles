@@ -44,6 +44,10 @@ vnoremap K :m '<-2<CR>gv=gv
 nnoremap <leader>p "+p
 nnoremap <leader>y "+y
 
+" Commenting (like vim-commentary)
+nnoremap gcc :action CommentByLineComment<CR>
+vnoremap gc :action CommentByLineComment<CR>
+
 " Tab navigation
 " nnoremap <Tab> :tabnext<CR>
 " nnoremap <S-Tab> :tabprevious<CR>
