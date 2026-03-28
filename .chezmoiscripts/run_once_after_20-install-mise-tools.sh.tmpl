@@ -2,7 +2,7 @@
 
 # Mise tools hash: {{ include "dot_config/mise/config.toml.tmpl" | sha256sum }}
 
-set -e
+set -euo pipefail
 
 # Color codes for output
 RED='\033[0;31m'
