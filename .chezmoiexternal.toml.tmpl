@@ -1,5 +1,15 @@
 {{- if eq .chezmoi.os "linux" }}
 
+[".local/bin/sesh"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "joshmedeski/sesh" "sesh_Linux_x86_64.tar.gz" | quote }}
+    executable = true
+    path = "sesh"
+    refreshPeriod = "168h"
+
+{{- end }}
+{{- if eq .chezmoi.os "linux" }}
+
 [".local/bin/fd"]
     type = "archive-file"
     url = {{ gitHubLatestReleaseAssetURL "sharkdp/fd" "fd-v*-x86_64-unknown-linux-musl.tar.gz" | quote }}
@@ -13,6 +23,28 @@
     url = {{ gitHubLatestReleaseAssetURL "sharkdp/fd" "fd-v*-x86_64-unknown-linux-musl.tar.gz" | quote }}
     stripComponents = 1
     path = "autocomplete/_fd"
+    refreshPeriod = "168h"
+
+[".local/bin/fzf"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "junegunn/fzf" "fzf-*-linux_amd64.tar.gz" | quote }}
+    executable = true
+    path = "fzf"
+    refreshPeriod = "168h"
+
+[".local/bin/rg"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "BurntSushi/ripgrep" "ripgrep-*-x86_64-unknown-linux-musl.tar.gz" | quote }}
+    executable = true
+    stripComponents = 1
+    path = "rg"
+    refreshPeriod = "168h"
+
+[".local/share/zsh/completions/_rg"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "BurntSushi/ripgrep" "ripgrep-*-x86_64-unknown-linux-musl.tar.gz" | quote }}
+    stripComponents = 1
+    path = "complete/_rg"
     refreshPeriod = "168h"
 
 {{- end }}

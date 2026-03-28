@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -e
+
+# Check if sesh is installed
+if ! command -v sesh &> /dev/null; then
+    echo "⨯ sesh not found. Skipping completions."
+    exit 0
+fi
+
+# Create completions directory
+mkdir -p ~/.local/share/zsh/completions
+
+# Generate and install completion
+if ! sesh completion zsh > ~/.local/share/zsh/completions/_sesh 2>/dev/null; then
+    echo "⨯ Failed to generate sesh completion"
+    exit 1
+fi

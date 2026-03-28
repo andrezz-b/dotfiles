@@ -2,10 +2,6 @@
 uv = "latest"
 node = "24"
 python = "3.14"
-{{- if eq .chezmoi.os "linux"}}
-fzf = "latest"
-ripgrep = "latest"
-{{- end }}
 
 [settings]
 idiomatic_version_file_enable_tools = ["python", "node"]
