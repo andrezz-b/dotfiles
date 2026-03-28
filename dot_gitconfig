@@ -18,6 +18,9 @@
 	gpgsign = false
 [tag]
 	gpgSign = false
+
+[url "git@github.com:andrezz-b/"]
+	insteadOf = https://github.com/andrezzz-b/
 ###
 ### Include local overrides
 ###
