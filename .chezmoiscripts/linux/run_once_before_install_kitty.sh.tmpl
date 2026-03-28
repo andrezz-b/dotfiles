@@ -1,4 +1,3 @@
-{{ if eq .chezmoi.os "linux" -}}
 #!/bin/bash
 
 set -euo pipefail
@@ -12,4 +11,3 @@ ln -sf ~/.local/kitty.app/bin/kitty ~/.local/kitty.app/bin/kitten ~/.local/bin/
 # Place the kitty.desktop file somewhere it can be found by the OS
 mkdir -p ~/.local/share/applications
 cp ~/.local/kitty.app/share/applications/kitty.desktop ~/.local/share/applications/
-{{ end -}}

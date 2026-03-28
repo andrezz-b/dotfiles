@@ -1,7 +1,4 @@
-{{ if eq .chezmoi.os "linux" -}}
 #!/bin/bash
-
-# Package list hash: {{ include "scripts/Brewfile" | sha256sum }}
 
 set -euo pipefail
 
@@ -60,4 +57,3 @@ echo -e "${GREEN}======================================================"
 echo "  System Package Installation Complete!"
 echo "======================================================${NC}"
 echo ""
-{{ end -}}

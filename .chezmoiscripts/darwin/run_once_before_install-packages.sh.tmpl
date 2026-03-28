@@ -1,9 +1,8 @@
-{{ if eq .chezmoi.os "darwin" -}}
 #!/bin/bash
 
 # Brewfile hash: {{ include "scripts/Brewfile" | sha256sum }}
 
-set -e
+set -euo pipefail
 
 echo "Installing packages with Homebrew..."
 
@@ -20,4 +19,3 @@ brew bundle --file={{ .chezmoi.sourceDir }}/scripts/Brewfile
 curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
 
 echo "Package installation complete!"
-{{ end -}}
