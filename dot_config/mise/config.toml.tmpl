@@ -1,7 +1,17 @@
 [tools]
-uv = "{{ (gitHubLatestTag "astral-sh/uv").Name -}}"
+uv = "latest"
 node = "24"
 python = "3.14"
+{{ if eq .chezmoi.os "linux" -}}
+fzf = "latest"
+"aqua:junegunn/fzf/fzf-tmux" = "latest"
+ripgrep = "latest"
+bat = "latest"
+fd = "latest"
+eza = "latest"
+lazygit = "latest"
+tmux = "latest"
+{{ end -}}
 
 [settings]
 idiomatic_version_file_enable_tools = ["python", "node"]

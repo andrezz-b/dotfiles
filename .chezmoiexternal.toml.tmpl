@@ -1,78 +1,5 @@
 {{- if eq .chezmoi.os "linux" }}
 
-[".local/bin/bat"]
-    type = "archive-file"
-    url = {{ gitHubLatestReleaseAssetURL "sharkdp/bat" "bat-v*-x86_64-unknown-linux-musl.tar.gz" | quote }}
-    executable = true
-    stripComponents = 1
-    path = "bat"
-    refreshPeriod = "168h"
-
-[".local/share/zsh/completions/_bat"]
-    type = "archive-file"
-    url = {{ gitHubLatestReleaseAssetURL "sharkdp/bat" "bat-v*-x86_64-unknown-linux-musl.tar.gz" | quote }}
-    stripComponents = 1
-    path = "autocomplete/bat.zsh"
-    refreshPeriod = "168h"
-
-[".local/bin/sesh"]
-    type = "archive-file"
-    url = {{ gitHubLatestReleaseAssetURL "joshmedeski/sesh" "sesh_Linux_x86_64.tar.gz" | quote }}
-    executable = true
-    path = "sesh"
-    refreshPeriod = "168h"
-
-[".local/bin/fd"]
-    type = "archive-file"
-    url = {{ gitHubLatestReleaseAssetURL "sharkdp/fd" "fd-v*-x86_64-unknown-linux-musl.tar.gz" | quote }}
-    executable = true
-    stripComponents = 1
-    path = "fd"
-    refreshPeriod = "168h"
-
-[".local/share/zsh/completions/_fd"]
-    type = "archive-file"
-    url = {{ gitHubLatestReleaseAssetURL "sharkdp/fd" "fd-v*-x86_64-unknown-linux-musl.tar.gz" | quote }}
-    stripComponents = 1
-    path = "autocomplete/_fd"
-    refreshPeriod = "168h"
-
-[".local/bin/fzf"]
-    type = "archive-file"
-    url = {{ gitHubLatestReleaseAssetURL "junegunn/fzf" "fzf-*-linux_amd64.tar.gz" | quote }}
-    executable = true
-    path = "fzf"
-    refreshPeriod = "168h"
-
-[".local/bin/rg"]
-    type = "archive-file"
-    url = {{ gitHubLatestReleaseAssetURL "BurntSushi/ripgrep" "ripgrep-*-x86_64-unknown-linux-musl.tar.gz" | quote }}
-    executable = true
-    stripComponents = 1
-    path = "rg"
-    refreshPeriod = "168h"
-
-[".local/share/zsh/completions/_rg"]
-    type = "archive-file"
-    url = {{ gitHubLatestReleaseAssetURL "BurntSushi/ripgrep" "ripgrep-*-x86_64-unknown-linux-musl.tar.gz" | quote }}
-    stripComponents = 1
-    path = "complete/_rg"
-    refreshPeriod = "168h"
-
-[".local/bin/lazygit"]
-    type = "archive-file"
-    url = {{ gitHubLatestReleaseAssetURL "jesseduffield/lazygit" "lazygit_*_linux_x86_64.tar.gz" | quote }}
-    executable = true
-    path = "lazygit"
-    refreshPeriod = "168h"
-
-[".local/bin/eza"]
-    type = "archive-file"
-    url = {{ gitHubLatestReleaseAssetURL "eza-community/eza" "eza_x86_64-unknown-linux-gnu.tar.gz" | quote }}
-    executable = true
-    path = "./eza"
-    refreshPeriod = "168h"
-
 [".local/bin/nvim"]
     type = "file"
     url = "https://github.com/neovim/neovim/releases/download/stable/nvim-linux-x86_64.appimage"
@@ -85,5 +12,82 @@
     executable = true
     path = "bw"
     refreshPeriod = "168h"
+
+[".local/bin/sesh"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "joshmedeski/sesh" "sesh_Linux_x86_64.tar.gz" | quote }}
+    executable = true
+    path = "sesh"
+    refreshPeriod = "168h"
+
+# Completions
+
+[".local/share/zsh/completions/_bat"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "sharkdp/bat" "bat-v*-x86_64-unknown-linux-musl.tar.gz" | quote }}
+    stripComponents = 1
+    path = "autocomplete/bat.zsh"
+    refreshPeriod = "168h"
+
+[".local/share/zsh/completions/_fd"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "sharkdp/fd" "fd-v*-x86_64-unknown-linux-musl.tar.gz" | quote }}
+    stripComponents = 1
+    path = "autocomplete/_fd"
+    refreshPeriod = "168h"
+
+[".local/share/zsh/completions/_rg"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "BurntSushi/ripgrep" "ripgrep-*-x86_64-unknown-linux-musl.tar.gz" | quote }}
+    stripComponents = 1
+    path = "complete/_rg"
+    refreshPeriod = "168h"
+
+
+# Installed using mise
+# [".local/bin/bat"]
+#     type = "archive-file"
+#     url = {{ gitHubLatestReleaseAssetURL "sharkdp/bat" "bat-v*-x86_64-unknown-linux-musl.tar.gz" | quote }}
+#     executable = true
+#     stripComponents = 1
+#     path = "bat"
+#     refreshPeriod = "168h"
+
+# [".local/bin/fd"]
+#     type = "archive-file"
+#     url = {{ gitHubLatestReleaseAssetURL "sharkdp/fd" "fd-v*-x86_64-unknown-linux-musl.tar.gz" | quote }}
+#     executable = true
+#     stripComponents = 1
+#     path = "fd"
+#     refreshPeriod = "168h"
+
+# [".local/bin/fzf"]
+#     type = "archive-file"
+#     url = {{ gitHubLatestReleaseAssetURL "junegunn/fzf" "fzf-*-linux_amd64.tar.gz" | quote }}
+#     executable = true
+#     path = "fzf"
+#     refreshPeriod = "168h"
+
+# [".local/bin/rg"]
+#     type = "archive-file"
+#     url = {{ gitHubLatestReleaseAssetURL "BurntSushi/ripgrep" "ripgrep-*-x86_64-unknown-linux-musl.tar.gz" | quote }}
+#     executable = true
+#     stripComponents = 1
+#     path = "rg"
+#     refreshPeriod = "168h"
+
+# [".local/bin/lazygit"]
+#     type = "archive-file"
+#     url = {{ gitHubLatestReleaseAssetURL "jesseduffield/lazygit" "lazygit_*_linux_x86_64.tar.gz" | quote }}
+#     executable = true
+#     path = "lazygit"
+#     refreshPeriod = "168h"
+
+# [".local/bin/eza"]
+#     type = "archive-file"
+#     url = {{ gitHubLatestReleaseAssetURL "eza-community/eza" "eza_x86_64-unknown-linux-gnu.tar.gz" | quote }}
+#     executable = true
+#     path = "./eza"
+#     refreshPeriod = "168h"
 
 {{- end }}
