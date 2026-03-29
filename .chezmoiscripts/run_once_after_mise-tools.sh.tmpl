@@ -5,23 +5,4 @@
 set -euo pipefail
 
 # Install mise tools
-mise install 2>/dev/null
-install_result=$?
-
-if [ $install_result -ne 0 ]; then
-    echo "⨯ Some mise tools failed to install."
-    echo ""
-    echo "Partially installed tools:"
-    mise list
-    echo ""
-    echo "Troubleshooting:"
-    echo "  1. Check mise status: mise doctor"
-    echo "  2. Try installing manually: mise install"
-    echo "  3. Check network connectivity"
-    echo ""
-
-    read -p "Accept partial installation? [y/N]: " accept_partial
-    if [[ ! $accept_partial =~ ^[Yy]$ ]]; then
-        exit 1
-    fi
-fi
+mise install
