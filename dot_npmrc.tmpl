@@ -1,4 +1,4 @@
 {{- if .is_work }}
 @lego:registry=https://npm.pkg.github.com/
-//npm.pkg.github.com/:_authToken={{ .gh_pat }}
+//npm.pkg.github.com/:_authToken={{ (bitwarden "item" "Secret-GitHubPAT").login.password }}
 {{- end }}

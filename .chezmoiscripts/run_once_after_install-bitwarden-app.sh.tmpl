@@ -2,23 +2,11 @@
 
 set -euo pipefail
 
-# Color codes for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
-
-echo ""
-echo "======================================================"
-echo "  Bitwarden Setup"
-echo "======================================================"
-echo ""
-
 # Helper functions
 check_bitwarden_installed() {
     if [ "$CHEZMOI_OS" = "darwin" ]; then
         if [ -d "/Applications/Bitwarden.app" ]; then
-            echo "brew-cask"
+            echo "dmg"
             return 0
         fi
     elif [ "$CHEZMOI_OS" = "linux" ]; then
@@ -35,7 +23,7 @@ check_bitwarden_installed() {
 
 check_ssh_agent_socket() {
     if [ "$CHEZMOI_OS" = "darwin" ]; then
-        local mac_socket="$HOME/Library/Containers/com.bitwarden.desktop/Data/.bitwarden-ssh-agent.sock"
+        local mac_socket="$HOME/.bitwarden-ssh-agent.sock"
         if [ -S "$mac_socket" ]; then
             echo "$mac_socket"
             return 0
@@ -61,43 +49,32 @@ check_ssh_agent_socket() {
 
 install_bitwarden_linux() {
     echo ""
-    echo -e "${YELLOW}Bitwarden is not installed on Linux.${NC}"
-    echo ""
-    echo "Available installation methods:"
+    echo "Bitwarden installation methods:"
     echo "  1) Flatpak (recommended)"
     echo "  2) Snap"
-    echo "  3) Skip (install manually later)"
+    echo "  3) Skip"
     echo ""
-    read -p "Choose installation method [1-3]: " choice
+    read -p "Choose [1-3]: " choice
 
     case $choice in
         1)
             if ! command -v flatpak &> /dev/null; then
-                echo -e "${YELLOW}Installing flatpak...${NC}"
                 sudo apt-get update
                 sudo apt-get install -y flatpak
                 sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
             fi
-            echo -e "${GREEN}Installing Bitwarden via Flatpak...${NC}"
             flatpak install -y flathub com.bitwarden.desktop
             return 0
             ;;
         2)
             if ! command -v snap &> /dev/null; then
-                echo -e "${YELLOW}Installing snapd...${NC}"
                 sudo apt-get update
                 sudo apt-get install -y snapd
             fi
-            echo -e "${GREEN}Installing Bitwarden via Snap...${NC}"
             sudo snap install bitwarden
             return 0
             ;;
-        3)
-            echo -e "${RED}Skipping Bitwarden installation.${NC}"
-            return 1
-            ;;
         *)
-            echo -e "${RED}Invalid choice. Skipping Bitwarden installation.${NC}"
             return 1
             ;;
     esac
@@ -105,38 +82,28 @@ install_bitwarden_linux() {
 
 prompt_bitwarden_setup() {
     echo ""
-    echo -e "${YELLOW}=====================================================${NC}"
-    echo -e "${YELLOW}  Bitwarden SSH Agent Setup Required${NC}"
-    echo -e "${YELLOW}=====================================================${NC}"
+    echo "Bitwarden SSH Agent Setup:"
+    echo "  1. Open Bitwarden"
+    echo "  2. Log in"
+    echo "  3. Settings → Preferences"
+    echo "  4. Enable 'Use Bitwarden as SSH agent'"
+    echo "  5. Add your SSH keys"
     echo ""
-    echo "To enable SSH authentication, you need to:"
-    echo ""
-    echo "1. Open Bitwarden application"
-    echo "2. Log in to your account"
-    echo "3. Go to Settings → Preferences"
-    echo "4. Enable 'Use Bitwarden as SSH agent'"
-    echo "5. Make sure your SSH keys are stored in Bitwarden"
-    echo ""
-    echo -e "${GREEN}Press Enter when you have completed these steps...${NC}"
-    read -r
+    read -p "Press Enter when done..."
 }
 
 wait_for_ssh_agent() {
-    echo -e "${YELLOW}Waiting for SSH agent socket to be available...${NC}"
     local max_attempts=30
     local attempt=0
 
     while [ $attempt -lt $max_attempts ]; do
         if check_ssh_agent_socket &> /dev/null; then
-            echo -e "${GREEN}SSH agent socket detected!${NC}"
             return 0
         fi
         attempt=$((attempt + 1))
-        echo "Attempt $attempt/$max_attempts..."
         sleep 2
     done
 
-    echo -e "${RED}SSH agent socket not found after $max_attempts attempts.${NC}"
     return 1
 }
 
@@ -147,8 +114,6 @@ BW_INSTALLED=$?
 set -e
 
 if [ $BW_INSTALLED -ne 0 ]; then
-    echo -e "${YELLOW}⨯ Bitwarden is not installed${NC}"
-
     if [ "$CHEZMOI_OS" = "linux" ]; then
         set +e
         install_bitwarden_linux
@@ -156,9 +121,8 @@ if [ $BW_INSTALLED -ne 0 ]; then
         set -e
 
         if [ $INSTALL_RESULT -ne 0 ]; then
-            echo -e "${YELLOW}Bitwarden installation was skipped.${NC}"
-            echo ""
-            echo "You can install it later and re-run: chezmoi apply"
+            echo "Bitwarden installation skipped."
+            echo "Re-run 'chezmoi apply' after installing."
             exit 1
         fi
 
@@ -167,20 +131,18 @@ if [ $BW_INSTALLED -ne 0 ]; then
         BW_INSTALLED=$?
         set -e
     elif [ "$CHEZMOI_OS" = "darwin" ]; then
-        echo -e "${YELLOW}Bitwarden is not installed on macOS.${NC}"
+        echo "Bitwarden not installed."
         echo ""
-        echo "The Homebrew cask version does not support SSH agent."
-        echo "Please download the official version from:"
+        echo "Download from:"
         echo "  https://bitwarden.com/download/?app=desktop&platform=macos&variant=dmg"
         echo ""
-        echo "After installing, re-run: chezmoi apply"
-        exit 1 
+        echo "Note: Homebrew cask version does not support SSH agent."
+        echo "Re-run 'chezmoi apply' after installing."
+        exit 1
     fi
 fi
 
 if [ $BW_INSTALLED -eq 0 ]; then
-    echo -e "${GREEN}✓ Bitwarden is installed ($BW_TYPE)${NC}"
-
     # Check SSH agent socket
     set +e
     SSH_SOCKET=$(check_ssh_agent_socket)
@@ -188,7 +150,6 @@ if [ $BW_INSTALLED -eq 0 ]; then
     set -e
 
     if [ $SOCKET_CHECK -ne 0 ]; then
-        echo -e "${YELLOW}⨯ SSH agent socket not found${NC}"
         prompt_bitwarden_setup
 
         set +e
@@ -197,42 +158,23 @@ if [ $BW_INSTALLED -eq 0 ]; then
         set -e
 
         if [ $WAIT_RESULT -ne 0 ]; then
-            echo -e "${YELLOW}Warning: SSH agent not detected.${NC}"
-            echo ""
-            echo "You can set it up later by:"
-            echo "  1. Opening Bitwarden"
-            echo "  2. Going to Settings → Preferences"
-            echo "  3. Enabling 'Use Bitwarden as SSH agent'"
-            echo ""
+            echo "SSH agent not detected."
+            echo "Set up manually: Settings → Preferences → SSH agent"
             exit 0
         else
             SSH_SOCKET=$(check_ssh_agent_socket)
         fi
-    else
-        echo -e "${GREEN}✓ SSH agent socket is available${NC}"
     fi
 
     # Test SSH authentication
     if [ -n "$SSH_SOCKET" ]; then
-        echo ""
-        echo "Testing SSH key availability..."
         export SSH_AUTH_SOCK="$SSH_SOCKET"
 
         if ssh-add -l &> /dev/null; then
-            echo -e "${GREEN}✓ SSH keys are loaded in Bitwarden${NC}"
-            echo ""
-            echo "Loaded keys:"
+            echo "SSH keys loaded:"
             ssh-add -l
         else
-            echo -e "${YELLOW}⨯ No SSH keys found in Bitwarden${NC}"
-            echo ""
-            echo "Please add your SSH keys to Bitwarden for authentication."
+            echo "No SSH keys found in Bitwarden."
         fi
     fi
 fi
-
-echo ""
-echo -e "${GREEN}======================================================"
-echo "  Bitwarden Setup Complete!"
-echo "======================================================${NC}"
-echo ""

@@ -1,5 +1,20 @@
 {{- if eq .chezmoi.os "linux" }}
 
+[".local/bin/bat"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "sharkdp/bat" "bat-v*-x86_64-unknown-linux-musl.tar.gz" | quote }}
+    executable = true
+    stripComponents = 1
+    path = "bat"
+    refreshPeriod = "168h"
+
+[".local/share/zsh/completions/_bat"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "sharkdp/bat" "bat-v*-x86_64-unknown-linux-musl.tar.gz" | quote }}
+    stripComponents = 1
+    path = "autocomplete/bat.zsh"
+    refreshPeriod = "168h"
+
 [".local/bin/sesh"]
     type = "archive-file"
     url = {{ gitHubLatestReleaseAssetURL "joshmedeski/sesh" "sesh_Linux_x86_64.tar.gz" | quote }}

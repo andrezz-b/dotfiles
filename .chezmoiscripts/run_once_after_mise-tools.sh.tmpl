@@ -4,5 +4,8 @@
 
 set -euo pipefail
 
+# Set GitHub token for mise (for API rate limiting)
+export GITHUB_TOKEN={{ (bitwarden "item" "Secret-GitHubAPIPAT").login.password | quote }}
+
 # Install mise tools
 mise install

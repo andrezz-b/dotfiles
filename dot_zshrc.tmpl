@@ -141,12 +141,14 @@ fi
 bindkey "^[[1;5C" forward-word
 bindkey "^[[1;5D" backward-word
 
-# Add Kitty to path
-export PATH="$HOME/.local/bin:$PATH"
+# Bitwarden login
+bwlogin() {
+  export BW_SESSION="$(bw unlock --raw)"
+}
 
 # Bitwarden SSH agent
 {{- if eq .chezmoi.os "darwin" }}
-export SSH_AUTH_SOCK=$HOME/Library/Containers/com.bitwarden.desktop/Data/.bitwarden-ssh-agent.sock
+export SSH_AUTH_SOCK=$HOME/.bitwarden-ssh-agent.sock
 {{- else if eq .chezmoi.os "linux" }}
 # Check for Bitwarden SSH agent socket based on installation type
 if [ -S "$HOME/snap/bitwarden/current/.bitwarden-ssh-agent.sock" ]; then
@@ -159,23 +161,32 @@ elif [ -S "$HOME/.bitwarden-ssh-agent.sock" ]; then
   # Binary installation
   export SSH_AUTH_SOCK=$HOME/.bitwarden-ssh-agent.sock
 fi
-
-export PATH="$PATH:/opt/nvim-linux-x86_64/bin"
 {{- end }}
 
 # Load ENV variables
 {{- if .is_work }}
 # GitHub Token
-export HOMEBREW_GITHUB_API_TOKEN={{ .gh_pat }}
+export HOMEBREW_GITHUB_API_TOKEN={{ (bitwarden "item" "Secret-GitHubPAT").login.password | quote }}
+export GITHUB_TOKEN={{ (bitwarden "item" "Secret-GitHubPAT").login.password | quote }}
 
 # Claude Code
 export ANTHROPIC_DEFAULT_SONNET_MODEL="anthropic.claude-sonnet-4-5-20250929-v1:0"
 export ANTHROPIC_DEFAULT_HAIKU_MODEL="anthropic.claude-haiku-4-5-20251001-v1:0"
 export ANTHROPIC_DEFAULT_OPUS_MODEL="anthropic.claude-opus-4-5-20251101-v1:0"
 export ANTHROPIC_BASE_URL="https://models.assistant.legogroup.io/claude"
-export ANTHROPIC_AUTH_TOKEN={{ .anthropic_auth_token | quote }}
+export ANTHROPIC_AUTH_TOKEN={{ (bitwarden "item" "Secret-AnthropicAuthToken").login.password | quote }}
+{{- else }}
+# GitHub Token (for API rate limiting)
+export GITHUB_TOKEN={{ (bitwarden "item" "Secret-GitHubAPIPAT").login.password | quote }}
 {{- end}}
 
 export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
 export PATH="$HOME/bin:$PATH"
-export EDITOR="nvim"
+export PATH="$HOME/.local/bin:$PATH"
+{{ if stat (printf "%s/.local/bin/nvim" .chezmoi.homeDir) -}}
+export EDITOR=$HOME/.local/bin/nvim
+{{ else if lookPath "nvim" -}}
+export EDITOR=nvim
+{{ else -}}
+export EDITOR=vim
+{{ end -}}

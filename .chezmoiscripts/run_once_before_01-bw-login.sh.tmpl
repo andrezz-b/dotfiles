@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -euo pipefail
+
+# Check if bw CLI is installed
+if ! command -v bw &> /dev/null; then
+    echo "⨯ Bitwarden CLI (bw) not found."
+    echo "Install it first, then re-run: chezmoi apply"
+    exit 1
+fi
+
+# Configure Bitwarden server
+bw config server https://vault.bitwarden.eu
+
+# Check if already logged in
+if bw status | grep -q '"status":"unauthenticated"'; then
+    echo "Bitwarden CLI login required."
+    bw login
+else
+    echo "Already logged in to Bitwarden CLI."
+fi
