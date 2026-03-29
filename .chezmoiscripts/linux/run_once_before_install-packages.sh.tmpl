@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+export GITHUB_TOKEN={{ (bitwarden "item" "Secret-GitHubAPIPAT").login.password | quote }}
+
 # Update package list
 sudo apt-get update
 
