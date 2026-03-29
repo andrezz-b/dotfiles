@@ -159,7 +159,7 @@ if [ $BW_INSTALLED -ne 0 ]; then
             echo -e "${YELLOW}Bitwarden installation was skipped.${NC}"
             echo ""
             echo "You can install it later and re-run: chezmoi apply"
-            exit 0
+            exit 1
         fi
 
         set +e
@@ -167,9 +167,14 @@ if [ $BW_INSTALLED -ne 0 ]; then
         BW_INSTALLED=$?
         set -e
     elif [ "$CHEZMOI_OS" = "darwin" ]; then
-        echo -e "${YELLOW}Bitwarden should have been installed via Homebrew.${NC}"
-        echo "Please run: brew install --cask bitwarden"
-        exit 0
+        echo -e "${YELLOW}Bitwarden is not installed on macOS.${NC}"
+        echo ""
+        echo "The Homebrew cask version does not support SSH agent."
+        echo "Please download the official version from:"
+        echo "  https://bitwarden.com/download/?app=desktop&platform=macos&variant=dmg"
+        echo ""
+        echo "After installing, re-run: chezmoi apply"
+        exit 1 
     fi
 fi
 

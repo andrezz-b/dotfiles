@@ -22,5 +22,4 @@ brew "sesh"             # Tmux session manager
 brew "jandedobbeleer/oh-my-posh/oh-my-posh"  # Prompt theme engine
 
 # Applications
-cask "bitwarden"        # Password manager
 cask "font-jetbrains-mono"
