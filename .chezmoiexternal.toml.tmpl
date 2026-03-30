@@ -6,13 +6,6 @@
     executable = true
     refreshPeriod = "168h"
 
-[".local/bin/bw"]
-    type = "archive-file"
-    url = "https://bitwarden.com/download/?app=cli&platform=linux"
-    executable = true
-    path = "bw"
-    refreshPeriod = "168h"
-
 [".local/bin/sesh"]
     type = "archive-file"
     url = {{ gitHubLatestReleaseAssetURL "joshmedeski/sesh" "sesh_Linux_x86_64.tar.gz" | quote }}

@@ -1,0 +1,55 @@
+#!/bin/bash
+
+{{- $latestCli := "" }}
+{{- range gitHubReleases "bitwarden/clients" }}
+{{-   $tagName := .TagName | toString }}
+{{-   if and (hasPrefix "cli-v" $tagName) (eq $latestCli "") }}
+{{-     $latestCli = $tagName }}
+{{-   end }}
+{{- end }}
+
+{{- $version := trimPrefix "cli-v" $latestCli }}
+
+{{- /* Determine the correct asset pattern based on OS and architecture */ -}}
+{{- $pattern := "" }}
+{{- if eq .chezmoi.os "linux" }}
+{{-   if eq .chezmoi.arch "arm64" }}
+{{-     $pattern = "bw-linux-arm64-*.zip" }}
+{{-   else }}
+{{-     $pattern = "bw-linux-*.zip" }}
+{{-   end }}
+{{- else if eq .chezmoi.os "darwin" }}
+{{-   if eq .chezmoi.arch "arm64" }}
+{{-     $pattern = "bw-macos-arm64-*.zip" }}
+{{-   else }}
+{{-     $pattern = "bw-macos-*.zip" }}
+{{-   end }}
+{{- end }}
+
+# BW CLI version: {{ $latestCli }}
+
+set -euo pipefail
+
+# Check if bw is already installed and up to date
+if command -v bw &> /dev/null; then
+    INSTALLED_VERSION=$(bw --version 2>/dev/null || echo "unknown")
+    if [ "$INSTALLED_VERSION" = "{{ $version }}" ]; then
+        exit 0
+    fi
+fi
+
+# Create .local/bin if it doesn't exist
+mkdir -p ~/.local/bin
+
+# Download and install bw CLI
+DOWNLOAD_URL="{{ gitHubReleaseAssetURL "bitwarden/clients" $latestCli $pattern }}"
+TEMP_DIR=$(mktemp -d)
+cd "$TEMP_DIR"
+
+curl -L -o bw.zip "$DOWNLOAD_URL"
+unzip -q bw.zip
+chmod +x bw
+mv bw ~/.local/bin/
+
+cd -
+rm -rf "$TEMP_DIR"
