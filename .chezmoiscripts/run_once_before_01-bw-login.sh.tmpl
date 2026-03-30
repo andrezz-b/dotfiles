@@ -9,12 +9,12 @@ if ! command -v bw &> /dev/null; then
     exit 1
 fi
 
-# Configure Bitwarden server
-bw config server https://vault.bitwarden.eu
 
 # Check if already logged in
 if bw status | grep -q '"status":"unauthenticated"'; then
+    # Configure Bitwarden server
     echo "Bitwarden CLI login required."
+    bw config server https://vault.bitwarden.eu
     bw login
 else
     echo "Already logged in to Bitwarden CLI."
