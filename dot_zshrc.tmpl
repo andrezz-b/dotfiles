@@ -165,6 +165,8 @@ fi
 
 # Load ENV variables
 {{- if .is_work }}
+export PATH="$(brew --prefix)/opt/postgresql@16/bin:$PATH"
+
 # GitHub Token
 export HOMEBREW_GITHUB_API_TOKEN={{ (bitwarden "item" "Secret-GitHubPAT").login.password | quote }}
 export GITHUB_TOKEN={{ (bitwarden "item" "Secret-GitHubPAT").login.password | quote }}
