@@ -174,7 +174,7 @@ export GITHUB_TOKEN={{ (bitwarden "item" "Secret-GitHubPAT").login.password | qu
 # Claude Code
 export ANTHROPIC_DEFAULT_SONNET_MODEL="anthropic.claude-sonnet-4-6"
 export ANTHROPIC_DEFAULT_HAIKU_MODEL="anthropic.claude-haiku-4-5-20251001-v1:0"
-export ANTHROPIC_DEFAULT_OPUS_MODEL="anthropic.claude-opus-4-6-v1"
+export ANTHROPIC_DEFAULT_OPUS_MODEL="anthropic.claude-opus-4-8"
 export ANTHROPIC_BASE_URL="https://models.assistant.legogroup.io/claude"
 export ANTHROPIC_AUTH_TOKEN={{ (bitwarden "item" "Secret-AnthropicAuthToken").login.password | quote }}
 {{- else }}
