@@ -1,0 +1,44 @@
+#:schema https://github.com/joshmedeski/sesh/raw/main/sesh.schema.json
+
+[default_session]
+preview_command = "eza --all --git --icons --color=always {}"
+
+[[session]]
+name = "Downloads 📥"
+path = "~/Downloads"
+startup_command = "ll"
+
+[[session]]
+name = "tmux config"
+path = "~/.config/tmux"
+startup_command = "nvim tmux.conf"
+preview_command = "bat --color=always ~/.config/tmux/tmux.conf"
+{{ if .is_work }}
+[[session]]
+name = "Atlas"
+
+windows = ["ddf", "atlas-core", "infra", "design-registry", "model-maturation", "frontend"]
+[[window]]
+name = "ddf"
+path = "~/work/projects/Design-Data-Foundation"
+
+[[window]]
+name = "atlas-core"
+path = "~/work/projects/Atlas-Core"
+
+[[window]]
+name = "infra"
+path = "~/work/projects/Atlas-Core-Infra/"
+
+[[window]]
+name = "design-registry"
+path = "~/work/projects/Design-Registry/"
+
+[[window]]
+name = "model-maturation"
+path = "~/work/projects/model-maturation/"
+
+[[window]]
+name = "frontend"
+path = "~/work/projects/Atlas-Frontend/"
+{{ end }}
