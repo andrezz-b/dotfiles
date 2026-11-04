@@ -170,9 +170,9 @@ export HOMEBREW_GITHUB_API_TOKEN={{ (bitwarden "item" "Secret-GitHubPAT").login.
 export GITHUB_TOKEN={{ (bitwarden "item" "Secret-GitHubPAT").login.password | quote }}
 
 # Claude Code
-export ANTHROPIC_DEFAULT_OPUS_MODEL="eu.anthropic.claude-opus-5"
-export ANTHROPIC_DEFAULT_SONNET_MODEL='eu.anthropic.claude-sonnet-5'
-export ANTHROPIC_DEFAULT_HAIKU_MODEL='eu.anthropic.claude-haiku-4-5-20251001-v1:0'
+export ANTHROPIC_DEFAULT_OPUS_MODEL="eu.anthropic.claude-opus-5-5"
+export ANTHROPIC_DEFAULT_SONNET_MODEL='eu.anthropic.claude-sonnet-5-5'
+export ANTHROPIC_DEFAULT_HAIKU_MODEL='eu.anthropic.claude-haiku-5-5'
 export ANTHROPIC_BASE_URL="https://api.genai.thelegogroup.com/claude"
 export ANTHROPIC_AUTH_TOKEN={{ (bitwarden "item" "Secret-ModelGatewaySecret").login.password | quote }}
 {{- else }}
