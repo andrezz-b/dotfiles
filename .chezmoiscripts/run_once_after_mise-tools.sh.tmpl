@@ -9,3 +9,7 @@ export GITHUB_TOKEN={{ (bitwarden "item" "Secret-GitHubAPIPAT").login.password |
 
 # Install mise tools
 mise install
+
+# Generate mise zsh completions (the mise.run installer doesn't install them)
+mkdir -p "$HOME/.local/share/zsh/completions"
+mise completion zsh > "$HOME/.local/share/zsh/completions/_mise"

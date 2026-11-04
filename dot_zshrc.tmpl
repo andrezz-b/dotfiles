@@ -177,6 +177,7 @@ export ANTHROPIC_BASE_URL="https://api.genai.thelegogroup.com/claude"
 export ANTHROPIC_AUTH_TOKEN={{ (bitwarden "item" "Secret-ModelGatewaySecret").login.password | quote }}
 {{- end}}
 
+export PATH="$HOME/.local/texlive/2026/bin/x86_64-linux:$PATH"
 export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
 export PATH="$HOME/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
